@@ -1,0 +1,89 @@
+/* Custom CSS for Cinema DB */
+
+/* General styles */
+body {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+main {
+    flex: 1;
+}
+
+/* Rating stars */
+.rating-stars {
+    color: var(--bs-warning);
+}
+
+.rating-input {
+    display: inline-flex;
+    cursor: pointer;
+}
+
+.rating-star {
+    font-size: 1.25rem;
+    padding: 0.25rem;
+    cursor: pointer;
+}
+
+/* Movie cards */
+.movie-poster {
+    max-height: 400px;
+    object-fit: cover;
+}
+
+.card-img-top {
+    height: 225px;
+    object-fit: cover;
+}
+
+/* Search highlight */
+.search-highlight {
+    background-color: rgba(var(--bs-warning-rgb), 0.3);
+    padding: 0.1rem 0.2rem;
+    border-radius: 2px;
+}
+
+/* Dashboard stats */
+.dashboard-stat {
+    border: none;
+    transition: transform 0.3s;
+}
+
+.dashboard-stat:hover {
+    transform: translateY(-5px);
+}
+
+/* Profile page */
+.profile-image {
+    width: 150px;
+    height: 150px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 5px solid var(--bs-dark);
+}
+
+/* Pagination */
+.page-item.active .page-link {
+    background-color: var(--bs-info);
+    border-color: var(--bs-info);
+}
+
+.page-link {
+    color: var(--bs-info);
+}
+
+/* Form validation */
+.has-error .form-control {
+    border-color: var(--bs-danger);
+}
+
+.invalid-feedback {
+    display: block;
+}
+
+/* Alerts */
+.alert {
+    margin-bottom: 1rem;
+}

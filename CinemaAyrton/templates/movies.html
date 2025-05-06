@@ -1,0 +1,173 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container">
+    <!-- Page Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1><i class="fas fa-film me-2"></i>Filmes</h1>
+        {% if current_user.is_authenticated %}
+        <a href="{{ url_for('movie_add') }}" class="btn btn-primary">
+            <i class="fas fa-plus me-1"></i> Adicionar Filme
+        </a>
+        {% endif %}
+    </div>
+    
+    <!-- Search and Filter Section -->
+    <div class="card shadow-sm mb-4">
+        <div class="card-body">
+            <form action="{{ url_for('movies') }}" method="GET" class="row g-3">
+                <div class="col-md-6">
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="fas fa-search"></i></span>
+                        <input type="text" name="search" class="form-control" placeholder="Buscar filmes..." value="{{ search }}">
+                        <button type="submit" class="btn btn-info">Buscar</button>
+                    </div>
+                </div>
+                
+                <div class="col-md-4">
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="fas fa-filter"></i></span>
+                        <select name="genre" class="form-select">
+                            <option value="">Todos os Gêneros</option>
+                            {% for g in genres %}
+                            <option value="{{ g }}" {% if genre == g %}selected{% endif %}>{{ g }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="col-md-2">
+                    <button type="submit" class="btn btn-outline-info w-100">
+                        <i class="fas fa-filter me-1"></i> Filtrar
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    <!-- Results Summary -->
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <p class="mb-0">
+            <span class="fw-bold">{{ total_items }}</span> filme(s) encontrado(s)
+            {% if search %}<span>para "{{ search }}"</span>{% endif %}
+            {% if genre %}<span>no gênero "{{ genre }}"</span>{% endif %}
+        </p>
+        
+        {% if search or genre %}
+        <a href="{{ url_for('movies') }}" class="btn btn-sm btn-outline-secondary">
+            <i class="fas fa-times me-1"></i> Limpar Filtros
+        </a>
+        {% endif %}
+    </div>
+    
+    <!-- Movies List -->
+    {% if movies %}
+    <div class="row">
+        {% for movie in movies %}
+        <div class="col-md-4 col-lg-3 mb-4">
+            <div class="card h-100 shadow-sm">
+                {% if movie.poster %}
+                <img src="{{ movie.poster }}" class="card-img-top" alt="{{ movie.title }}">
+                {% else %}
+                <div class="card-img-top bg-dark d-flex align-items-center justify-content-center" style="height: 200px;">
+                    <i class="fas fa-film fa-4x text-light opacity-50"></i>
+                </div>
+                {% endif %}
+                
+                <div class="card-body">
+                    <h5 class="card-title">{{ movie.title }}</h5>
+                    <p class="card-text">
+                        <small class="text-muted">
+                            <i class="fas fa-user-alt me-1"></i> {{ movie.director or 'Desconhecido' }}<br>
+                            <i class="fas fa-calendar-alt me-1"></i> {{ movie.release_year or 'N/A' }}
+                            {% if movie.genre %}
+                            <br><i class="fas fa-tag me-1"></i> {{ movie.genre }}
+                            {% endif %}
+                        </small>
+                    </p>
+                    
+                    <div class="mb-2">
+                        {% set rating = (movie.rating / 2)|round|int if movie.rating else 0 %}
+                        {% for i in range(1, 6) %}
+                            {% if i <= rating %}
+                                <i class="fas fa-star text-warning"></i>
+                            {% else %}
+                                <i class="far fa-star text-warning"></i>
+                            {% endif %}
+                        {% endfor %}
+                        <small class="text-muted">({{ "%.1f"|format(movie.rating or 0) }}/10)</small>
+                    </div>
+                </div>
+                
+                <div class="card-footer">
+                    <div class="d-flex justify-content-between">
+                        <a href="{{ url_for('movie_view', id=movie.id) }}" class="btn btn-sm btn-info">
+                            <i class="fas fa-eye me-1"></i> Ver
+                        </a>
+                        
+                        {% if current_user.is_authenticated and (current_user.id == movie.user_id or current_user.is_admin()) %}
+                        <div>
+                            <a href="{{ url_for('movie_edit', id=movie.id) }}" class="btn btn-sm btn-warning">
+                                <i class="fas fa-edit me-1"></i> Editar
+                            </a>
+                            <a href="{{ url_for('movies', delete=movie.id) }}" class="btn btn-sm btn-danger delete-movie">
+                                <i class="fas fa-trash-alt me-1"></i> Excluir
+                            </a>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    
+    <!-- Pagination -->
+    {% if total_pages > 1 %}
+    <nav aria-label="Page navigation" class="mt-4">
+        <ul class="pagination justify-content-center">
+            <li class="page-item {{ 'disabled' if page == 1 else '' }}">
+                <a class="page-link" href="{{ url_for('movies', page=page-1, search=search, genre=genre) if page > 1 else '#' }}" aria-label="Previous">
+                    <span aria-hidden="true">&laquo;</span>
+                </a>
+            </li>
+            
+            {% for i in range(1, total_pages + 1) %}
+                {% if i == 1 or i == total_pages or (i >= page - 2 and i <= page + 2) %}
+                    <li class="page-item {{ 'active' if i == page else '' }}">
+                        <a class="page-link" href="{{ url_for('movies', page=i, search=search, genre=genre) }}">{{ i }}</a>
+                    </li>
+                {% elif i == page - 3 or i == page + 3 %}
+                    <li class="page-item disabled">
+                        <a class="page-link" href="#">...</a>
+                    </li>
+                {% endif %}
+            {% endfor %}
+            
+            <li class="page-item {{ 'disabled' if page == total_pages else '' }}">
+                <a class="page-link" href="{{ url_for('movies', page=page+1, search=search, genre=genre) if page < total_pages else '#' }}" aria-label="Next">
+                    <span aria-hidden="true">&raquo;</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+    {% endif %}
+    
+    {% else %}
+    <div class="alert alert-info">
+        <h4 class="alert-heading"><i class="fas fa-info-circle me-2"></i>Nenhum filme encontrado!</h4>
+        <p>Não foram encontrados filmes com os critérios de busca atuais.</p>
+        
+        {% if search or genre %}
+            <a href="{{ url_for('movies') }}" class="btn btn-info">
+                <i class="fas fa-list me-1"></i> Ver Todos os Filmes
+            </a>
+        {% elif current_user.is_authenticated %}
+            <a href="{{ url_for('movie_add') }}" class="btn btn-primary">
+                <i class="fas fa-plus me-1"></i> Adicionar Novo Filme
+            </a>
+        {% endif %}
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

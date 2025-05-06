@@ -1,0 +1,214 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container">
+    <!-- Dashboard Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1><i class="fas fa-tachometer-alt me-2"></i>Painel de Controle</h1>
+        <a href="{{ url_for('movie_add') }}" class="btn btn-primary">
+            <i class="fas fa-plus me-1"></i> Adicionar Filme
+        </a>
+    </div>
+    
+    <!-- Stats Cards -->
+    <div class="row mb-4">
+        <div class="col-md-4">
+            <div class="card dashboard-stat bg-info text-white">
+                <div class="card-body text-center">
+                    <h1 class="display-4">{{ movie_count }}</h1>
+                    <p class="lead mb-0">Filmes Cadastrados</p>
+                </div>
+            </div>
+        </div>
+        
+        {% if current_user.is_admin() %}
+        <div class="col-md-4">
+            <div class="card dashboard-stat bg-primary text-white">
+                <div class="card-body text-center">
+                    <h1 class="display-4">{{ total_users }}</h1>
+                    <p class="lead mb-0">Usuários Registrados</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-4">
+            <div class="card dashboard-stat bg-success text-white">
+                <div class="card-body text-center">
+                    <h1 class="display-4">{{ total_movies }}</h1>
+                    <p class="lead mb-0">Total de Filmes</p>
+                </div>
+            </div>
+        </div>
+        {% else %}
+        <div class="col-md-4">
+            <div class="card dashboard-stat bg-primary text-white">
+                <div class="card-body text-center">
+                    <h1 class="display-4">{{ current_user.reviews|length }}</h1>
+                    <p class="lead mb-0">Avaliações Feitas</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-4">
+            <div class="card dashboard-stat bg-success text-white">
+                <div class="card-body text-center">
+                    <h1 class="display-4">{{ format_date(current_user.created_at, '%d/%m/%Y') }}</h1>
+                    <p class="lead mb-0">Membro Desde</p>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+    
+    <!-- User's Movies Section -->
+    <div class="card shadow-sm mb-4">
+        <div class="card-header bg-dark">
+            <h4 class="mb-0"><i class="fas fa-film me-2"></i>Meus Filmes</h4>
+        </div>
+        <div class="card-body">
+            <div class="mb-3 row">
+                <div class="col-md-6">
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="fas fa-search"></i></span>
+                        <input type="text" class="form-control" id="dashboard-search" placeholder="Buscar filmes...">
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="fas fa-sort"></i></span>
+                        <select class="form-select" id="sort-movies">
+                            <option value="title_asc">Título (A-Z)</option>
+                            <option value="title_desc">Título (Z-A)</option>
+                            <option value="year_desc">Ano (Mais recente)</option>
+                            <option value="year_asc">Ano (Mais antigo)</option>
+                            <option value="rating_desc">Classificação (Maior)</option>
+                            <option value="rating_asc">Classificação (Menor)</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+            
+            <div id="movies-container">
+                {% if latest_movies %}
+                <div class="row">
+                    {% for movie in latest_movies %}
+                    <div class="col-md-4 mb-4">
+                        <div class="card h-100">
+                            <div class="card-img-top bg-dark d-flex align-items-center justify-content-center" style="height: 200px;">
+                                {% if movie.poster %}
+                                <img src="{{ movie.poster }}" class="card-img-top" alt="{{ movie.title }}">
+                                {% else %}
+                                <i class="fas fa-film fa-4x text-light opacity-50"></i>
+                                {% endif %}
+                            </div>
+                            <div class="card-body">
+                                <h5 class="card-title">{{ movie.title }}</h5>
+                                <p class="card-text">
+                                    <small class="text-muted">
+                                        <i class="fas fa-user-alt me-1"></i> {{ movie.director or 'Desconhecido' }} | 
+                                        <i class="fas fa-calendar-alt me-1"></i> {{ movie.release_year or 'N/A' }}
+                                    </small>
+                                </p>
+                                <div class="mb-2">
+                                    {% set rating = (movie.rating / 2)|round|int if movie.rating else 0 %}
+                                    {% for i in range(1, 6) %}
+                                        {% if i <= rating %}
+                                            <i class="fas fa-star text-warning"></i>
+                                        {% else %}
+                                            <i class="far fa-star text-warning"></i>
+                                        {% endif %}
+                                    {% endfor %}
+                                    <small class="text-muted">({{ "%.1f"|format(movie.rating or 0) }}/10)</small>
+                                </div>
+                                <p class="card-text">
+                                    {% if movie.synopsis %}
+                                        {{ movie.synopsis|truncate(100) }}
+                                    {% else %}
+                                        <em>Sem sinopse disponível.</em>
+                                    {% endif %}
+                                </p>
+                            </div>
+                            <div class="card-footer d-flex justify-content-between">
+                                <a href="{{ url_for('movie_view', id=movie.id) }}" class="btn btn-sm btn-info">
+                                    <i class="fas fa-eye me-1"></i> Ver
+                                </a>
+                                <div>
+                                    <a href="{{ url_for('movie_edit', id=movie.id) }}" class="btn btn-sm btn-warning">
+                                        <i class="fas fa-edit me-1"></i> Editar
+                                    </a>
+                                    <a href="{{ url_for('movies', delete=movie.id) }}" class="btn btn-sm btn-danger delete-movie">
+                                        <i class="fas fa-trash-alt me-1"></i> Excluir
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <div class="alert alert-info">
+                    <p class="mb-0">Você ainda não cadastrou nenhum filme.</p>
+                    <a href="{{ url_for('movie_add') }}" class="btn btn-info mt-3">
+                        <i class="fas fa-plus me-1"></i> Adicionar Meu Primeiro Filme
+                    </a>
+                </div>
+                {% endif %}
+            </div>
+            
+            <div class="text-center mt-3">
+                <a href="{{ url_for('movies') }}" class="btn btn-outline-info">
+                    <i class="fas fa-list me-1"></i> Ver Todos os Filmes
+                </a>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Admin Section -->
+    {% if current_user.is_admin() %}
+    <div class="card shadow-sm">
+        <div class="card-header bg-dark">
+            <h4 class="mb-0"><i class="fas fa-users-cog me-2"></i>Administração</h4>
+        </div>
+        <div class="card-body">
+            <h5>Usuários Recentes</h5>
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Usuário</th>
+                            <th>Email</th>
+                            <th>Nome</th>
+                            <th>Data de Criação</th>
+                            <th>Função</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% if latest_users %}
+                            {% for user in latest_users %}
+                            <tr>
+                                <td>{{ user.id }}</td>
+                                <td>{{ user.username }}</td>
+                                <td>{{ user.email }}</td>
+                                <td>{{ user.first_name }} {{ user.last_name }}</td>
+                                <td>{{ format_date(user.created_at) }}</td>
+                                <td>
+                                    <span class="badge {{ 'bg-danger' if user.role == 'admin' else 'bg-info' }}">
+                                        {{ user.role }}
+                                    </span>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        {% else %}
+                            <tr>
+                                <td colspan="6" class="text-center">Nenhum usuário encontrado.</td>
+                            </tr>
+                        {% endif %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

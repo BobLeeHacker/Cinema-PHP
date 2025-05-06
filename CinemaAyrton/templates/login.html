@@ -1,0 +1,123 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-6">
+        <div class="card shadow-sm">
+            <div class="card-header bg-info text-white">
+                <h4 class="mb-0"><i class="fas fa-sign-in-alt me-2"></i>Entrar na sua Conta</h4>
+            </div>
+            <div class="card-body">
+                <form id="login-form" method="POST" action="{{ url_for('login') }}">
+                    <div class="mb-3">
+                        <label for="username" class="form-label">Nome de Usuário ou Email</label>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="fas fa-user"></i></span>
+                            <input type="text" class="form-control" id="username" name="username" required>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="password" class="form-label">Senha</label>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="fas fa-lock"></i></span>
+                            <input type="password" class="form-control" id="password" name="password" required>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3 form-check">
+                        <input type="checkbox" class="form-check-input" id="remember" name="remember">
+                        <label class="form-check-label" for="remember">Lembrar de mim</label>
+                    </div>
+                    
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-info text-white">
+                            <i class="fas fa-sign-in-alt me-2"></i>Entrar
+                        </button>
+                    </div>
+                </form>
+            </div>
+            <div class="card-footer text-center">
+                <p class="mb-0">Não tem uma conta? <a href="{{ url_for('register') }}">Registrar</a></p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Demo credentials alert -->
+<div class="row justify-content-center mt-4">
+    <div class="col-md-6">
+        <div class="alert alert-info">
+            <h5 class="alert-heading"><i class="fas fa-info-circle me-2"></i>Credenciais de Demonstração</h5>
+            <p class="mb-0"><strong>Admin:</strong> admin / admin123</p>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Form validation for login form
+        const loginForm = document.getElementById('login-form');
+        if (loginForm) {
+            loginForm.addEventListener('submit', function(e) {
+                let isValid = true;
+                
+                // Username/email validation
+                const username = document.getElementById('username');
+                if (!username.value.trim()) {
+                    showError(username, 'Nome de usuário ou email é obrigatório');
+                    isValid = false;
+                } else {
+                    hideError(username);
+                }
+                
+                // Password validation
+                const password = document.getElementById('password');
+                if (!password.value) {
+                    showError(password, 'Senha é obrigatória');
+                    isValid = false;
+                } else {
+                    hideError(password);
+                }
+                
+                if (!isValid) {
+                    e.preventDefault();
+                }
+            });
+        }
+        
+        // Helper functions for validation
+        function showError(input, message) {
+            const formGroup = input.closest('.mb-3');
+            formGroup.classList.add('has-error');
+            
+            let errorElement = formGroup.querySelector('.invalid-feedback');
+            if (!errorElement) {
+                errorElement = document.createElement('div');
+                errorElement.className = 'invalid-feedback';
+                input.after(errorElement);
+            }
+            
+            input.classList.add('is-invalid');
+            errorElement.textContent = message;
+            errorElement.style.display = 'block';
+        }
+        
+        function hideError(input) {
+            const formGroup = input.closest('.mb-3');
+            formGroup.classList.remove('has-error');
+            
+            const errorElement = formGroup.querySelector('.invalid-feedback');
+            if (errorElement) {
+                errorElement.textContent = '';
+                errorElement.style.display = 'none';
+            }
+            
+            input.classList.remove('is-invalid');
+            input.classList.add('is-valid');
+        }
+    });
+</script>
+{% endblock %}

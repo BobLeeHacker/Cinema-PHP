@@ -1,0 +1,166 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow-sm">
+                <div class="card-header bg-warning text-dark">
+                    <h4 class="mb-0"><i class="fas fa-edit me-2"></i>Editar Filme</h4>
+                </div>
+                <div class="card-body">
+                    <form id="movie-form" method="POST" action="{{ url_for('movie_edit', id=movie.id) }}">
+                        <!-- Title -->
+                        <div class="mb-3">
+                            <label for="title" class="form-label">Título <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" id="title" name="title" value="{{ movie.title }}" required>
+                        </div>
+                        
+                        <!-- Director -->
+                        <div class="mb-3">
+                            <label for="director" class="form-label">Diretor</label>
+                            <input type="text" class="form-control" id="director" name="director" value="{{ movie.director or '' }}">
+                        </div>
+                        
+                        <div class="row">
+                            <!-- Release Year -->
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    <label for="release_year" class="form-label">Ano de Lançamento</label>
+                                    <input type="number" class="form-control" id="release_year" name="release_year" min="1888" max="{{ 2025 + 5 }}" value="{{ movie.release_year or '' }}">
+                                </div>
+                            </div>
+                            
+                            <!-- Genre -->
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    <label for="genre" class="form-label">Gênero</label>
+                                    <input type="text" class="form-control" id="genre" name="genre" list="genre-list" value="{{ movie.genre or '' }}">
+                                    <datalist id="genre-list">
+                                        {% for genre in genres %}
+                                        <option value="{{ genre }}">
+                                        {% endfor %}
+                                    </datalist>
+                                </div>
+                            </div>
+                            
+                            <!-- Duration -->
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    <label for="duration" class="form-label">Duração (minutos)</label>
+                                    <input type="number" class="form-control" id="duration" name="duration" min="1" value="{{ movie.duration or '' }}">
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Rating -->
+                        <div class="mb-3">
+                            <label for="rating" class="form-label">Classificação (0-10)</label>
+                            <div class="rating-input mb-2">
+                                <input type="hidden" name="rating" id="rating" value="{{ movie.rating or 0 }}">
+                                <i class="rating-star {{ 'fas' if movie.rating and movie.rating >= 2 else 'far' }} fa-star" data-value="1"></i>
+                                <i class="rating-star {{ 'fas' if movie.rating and movie.rating >= 4 else 'far' }} fa-star" data-value="2"></i>
+                                <i class="rating-star {{ 'fas' if movie.rating and movie.rating >= 6 else 'far' }} fa-star" data-value="3"></i>
+                                <i class="rating-star {{ 'fas' if movie.rating and movie.rating >= 8 else 'far' }} fa-star" data-value="4"></i>
+                                <i class="rating-star {{ 'fas' if movie.rating and movie.rating >= 10 else 'far' }} fa-star" data-value="5"></i>
+                            </div>
+                            <div class="form-text">Clique nas estrelas para avaliar ou insira um valor numérico abaixo.</div>
+                            <input type="number" class="form-control" id="rating_input" step="0.1" min="0" max="10" value="{{ movie.rating or 0 }}">
+                        </div>
+                        
+                        <!-- Poster URL -->
+                        <div class="mb-3">
+                            <label for="poster" class="form-label">URL do Poster</label>
+                            <input type="url" class="form-control" id="poster" name="poster" placeholder="https://example.com/poster.jpg" value="{{ movie.poster or '' }}">
+                            <div class="form-text">Adicione a URL de uma imagem online para o poster do filme.</div>
+                            
+                            {% if movie.poster %}
+                            <div class="mt-2 mb-3 text-center">
+                                <p class="mb-2"><strong>Poster Atual:</strong></p>
+                                <img src="{{ movie.poster }}" alt="{{ movie.title }}" class="img-thumbnail" style="max-height: 200px;">
+                            </div>
+                            {% endif %}
+                        </div>
+                        
+                        <!-- Synopsis -->
+                        <div class="mb-3">
+                            <label for="synopsis" class="form-label">Sinopse</label>
+                            <textarea class="form-control" id="synopsis" name="synopsis" rows="4">{{ movie.synopsis or '' }}</textarea>
+                        </div>
+                        
+                        <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                            <a href="{{ url_for('movie_view', id=movie.id) }}" class="btn btn-secondary me-md-2">
+                                <i class="fas fa-times me-1"></i> Cancelar
+                            </a>
+                            <button type="submit" class="btn btn-warning">
+                                <i class="fas fa-save me-1"></i> Atualizar Filme
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Handle custom rating input field
+    document.addEventListener('DOMContentLoaded', function() {
+        const ratingStars = document.querySelectorAll('.rating-star');
+        const ratingInput = document.getElementById('rating');
+        const ratingNumberInput = document.getElementById('rating_input');
+        
+        // Set rating from stars
+        ratingStars.forEach(function(star) {
+            star.addEventListener('click', function() {
+                const value = parseInt(this.getAttribute('data-value'));
+                ratingInput.value = value * 2; // Convert to scale of 10
+                ratingNumberInput.value = value * 2;
+                
+                // Update stars display
+                ratingStars.forEach(function(s, index) {
+                    if (index < value) {
+                        s.classList.add('fas');
+                        s.classList.remove('far');
+                    } else {
+                        s.classList.add('far');
+                        s.classList.remove('fas');
+                    }
+                });
+            });
+        });
+        
+        // Set rating from number input
+        ratingNumberInput.addEventListener('change', function() {
+            const value = parseFloat(this.value);
+            if (value >= 0 && value <= 10) {
+                ratingInput.value = value;
+                const starValue = Math.round(value / 2);
+                
+                // Update stars display
+                ratingStars.forEach(function(s, index) {
+                    if (index < starValue) {
+                        s.classList.add('fas');
+                        s.classList.remove('far');
+                    } else {
+                        s.classList.add('far');
+                        s.classList.remove('fas');
+                    }
+                });
+            }
+        });
+        
+        // Handle form validation
+        const movieForm = document.getElementById('movie-form');
+        if (movieForm) {
+            movieForm.addEventListener('submit', function(e) {
+                if (!validateMovieForm()) {
+                    e.preventDefault();
+                }
+            });
+        }
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,172 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-6">
+        <div class="card shadow-sm">
+            <div class="card-header bg-primary text-white">
+                <h4 class="mb-0"><i class="fas fa-user-plus me-2"></i>Criar Nova Conta</h4>
+            </div>
+            <div class="card-body">
+                <form id="register-form" method="POST" action="{{ url_for('register') }}">
+                    <div class="mb-3">
+                        <label for="username" class="form-label">Nome de Usuário <span class="text-danger">*</span></label>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="fas fa-user"></i></span>
+                            <input type="text" class="form-control" id="username" name="username" required>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="email" class="form-label">Email <span class="text-danger">*</span></label>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="fas fa-envelope"></i></span>
+                            <input type="email" class="form-control" id="email" name="email" required>
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="first_name" class="form-label">Nome</label>
+                                <input type="text" class="form-control" id="first_name" name="first_name">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="last_name" class="form-label">Sobrenome</label>
+                                <input type="text" class="form-control" id="last_name" name="last_name">
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="password" class="form-label">Senha <span class="text-danger">*</span></label>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="fas fa-lock"></i></span>
+                            <input type="password" class="form-control" id="password" name="password" required>
+                        </div>
+                        <div class="form-text">A senha deve ter pelo menos 6 caracteres.</div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="password_confirm" class="form-label">Confirmar Senha <span class="text-danger">*</span></label>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="fas fa-lock"></i></span>
+                            <input type="password" class="form-control" id="password_confirm" name="password_confirm" required>
+                        </div>
+                    </div>
+                    
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-user-plus me-2"></i>Registrar
+                        </button>
+                    </div>
+                </form>
+            </div>
+            <div class="card-footer text-center">
+                <p class="mb-0">Já tem uma conta? <a href="{{ url_for('login') }}">Entrar</a></p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Form validation for registration form
+        const registerForm = document.getElementById('register-form');
+        if (registerForm) {
+            registerForm.addEventListener('submit', function(e) {
+                let isValid = true;
+                
+                // Username validation
+                const username = document.getElementById('username');
+                if (!username.value.trim()) {
+                    showError(username, 'Nome de usuário é obrigatório');
+                    isValid = false;
+                } else if (username.value.length < 3 || username.value.length > 50) {
+                    showError(username, 'Nome de usuário deve ter entre 3 e 50 caracteres');
+                    isValid = false;
+                } else {
+                    hideError(username);
+                }
+                
+                // Email validation
+                const email = document.getElementById('email');
+                if (!email.value.trim()) {
+                    showError(email, 'Email é obrigatório');
+                    isValid = false;
+                } else if (!isValidEmail(email.value)) {
+                    showError(email, 'Por favor, forneça um email válido');
+                    isValid = false;
+                } else {
+                    hideError(email);
+                }
+                
+                // Password validation
+                const password = document.getElementById('password');
+                if (!password.value) {
+                    showError(password, 'Senha é obrigatória');
+                    isValid = false;
+                } else if (password.value.length < 6) {
+                    showError(password, 'Senha deve ter pelo menos 6 caracteres');
+                    isValid = false;
+                } else {
+                    hideError(password);
+                }
+                
+                // Password confirmation validation
+                const passwordConfirm = document.getElementById('password_confirm');
+                if (password.value && passwordConfirm.value !== password.value) {
+                    showError(passwordConfirm, 'As senhas não coincidem');
+                    isValid = false;
+                } else {
+                    hideError(passwordConfirm);
+                }
+                
+                if (!isValid) {
+                    e.preventDefault();
+                }
+            });
+        }
+        
+        // Helper functions for validation
+        function showError(input, message) {
+            const formGroup = input.closest('.mb-3');
+            formGroup.classList.add('has-error');
+            
+            let errorElement = formGroup.querySelector('.invalid-feedback');
+            if (!errorElement) {
+                errorElement = document.createElement('div');
+                errorElement.className = 'invalid-feedback';
+                input.after(errorElement);
+            }
+            
+            input.classList.add('is-invalid');
+            errorElement.textContent = message;
+            errorElement.style.display = 'block';
+        }
+        
+        function hideError(input) {
+            const formGroup = input.closest('.mb-3');
+            formGroup.classList.remove('has-error');
+            
+            const errorElement = formGroup.querySelector('.invalid-feedback');
+            if (errorElement) {
+                errorElement.textContent = '';
+                errorElement.style.display = 'none';
+            }
+            
+            input.classList.remove('is-invalid');
+            input.classList.add('is-valid');
+        }
+        
+        function isValidEmail(email) {
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            return emailRegex.test(email);
+        }
+    });
+</script>
+{% endblock %}

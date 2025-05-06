@@ -1,0 +1,138 @@
+/* Custom styles for Cinema DB */
+
+/* Typography */
+body {
+    font-family: 'Poppins', sans-serif;
+    line-height: 1.6;
+}
+
+h1, h2, h3, h4, h5, h6 {
+    font-family: 'Montserrat', sans-serif;
+    font-weight: 700;
+}
+
+/* Navbar styling */
+.navbar-brand {
+    font-weight: 700;
+    font-size: 1.5rem;
+}
+
+/* Card styling */
+.card {
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    margin-bottom: 1.5rem;
+}
+
+.card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+}
+
+.card-img-top {
+    height: 300px;
+    object-fit: cover;
+}
+
+/* Movie details page */
+.movie-poster {
+    max-height: 500px;
+    object-fit: cover;
+}
+
+/* Form styling */
+.form-control:focus, .btn:focus {
+    box-shadow: 0 0 0 0.25rem rgba(var(--bs-info-rgb), 0.25);
+}
+
+/* Dashboard sections */
+.dashboard-stat {
+    padding: 1.5rem;
+    border-radius: 0.5rem;
+    margin-bottom: 1.5rem;
+}
+
+/* Animation for flash messages */
+.alert {
+    animation: fadeIn 0.5s ease-in-out;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* Profile page styling */
+.profile-header {
+    background-color: rgba(var(--bs-dark-rgb), 0.8);
+    padding: 2rem;
+    border-radius: 0.5rem;
+    margin-bottom: 2rem;
+}
+
+.profile-image {
+    width: 150px;
+    height: 150px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 5px solid rgba(var(--bs-info-rgb), 0.7);
+}
+
+/* Rating stars */
+.rating-stars {
+    color: var(--bs-warning);
+}
+
+/* Footer styling */
+.footer {
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.footer a {
+    color: var(--bs-light);
+    transition: color 0.3s ease;
+}
+
+.footer a:hover {
+    color: var(--bs-info);
+}
+
+/* Movie actions */
+.movie-actions {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    display: flex;
+    gap: 5px;
+}
+
+.movie-actions .btn {
+    opacity: 0.8;
+    transition: opacity 0.3s ease;
+}
+
+.movie-actions .btn:hover {
+    opacity: 1;
+}
+
+/* Breadcrumb styling */
+.breadcrumb {
+    background-color: rgba(var(--bs-dark-rgb), 0.6);
+    padding: 0.75rem 1rem;
+    border-radius: 0.25rem;
+    margin-bottom: 1.5rem;
+}
+
+/* Search results highlight */
+.search-highlight {
+    background-color: rgba(var(--bs-warning-rgb), 0.3);
+    padding: 0 0.2rem;
+    border-radius: 0.2rem;
+}
+
+/* Loading spinner */
+.spinner-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 200px;
+}
